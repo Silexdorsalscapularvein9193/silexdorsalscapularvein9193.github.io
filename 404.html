@@ -2,6 +2,11 @@
 <html lang="en">
 <head>
 <script>
+if(performance.getEntriesByType('navigation')[0]?.type==='reload'){
+  sessionStorage.removeItem('pending-level-pack');
+  sessionStorage.removeItem('selected-level-pack');
+  if(location.protocol!=='file:')history.replaceState(null,'','/LevelPackCreator/');
+}
 if(location.protocol!=="file:"){const root="/LevelPackCreator/";const base=document.createElement("base");base.href=root;document.head.append(base);window.directPack=decodeURIComponent(location.pathname.slice(root.length).replace(/\/$/,""));if(window.directPack==="index.html")window.directPack="";}
 </script>
 <meta charset="UTF-8">
@@ -692,6 +697,7 @@ function applyConfig(){
   document.body.classList.toggle('names-off',!optNames());
   document.body.classList.toggle('squares-off',!CONFIG.showTileSquares);
   document.body.classList.toggle('editing',!!editMode);
+  if(editMode){$('#game-choice').hidden=true;$('#btn-start').hidden=false;}
   $('.sel-header').textContent=editMode?'EDIT MODE':'STAGE SELECT';
   $('#btn-pack-settings').style.display=editMode?'inline':'none';
   $('#btn-save-pack').style.display=editMode?'inline':'none';
@@ -718,7 +724,7 @@ document.addEventListener('keydown',e=>{
     toggleEditMode();
   }
 });
-function pressStart(){sfx();$('#btn-start').hidden=true;$('#game-choice').hidden=false;}
+function pressStart(){sfx();if(editMode){showScreen('screen-select');return;}$('#btn-start').hidden=true;$('#game-choice').hidden=false;}
 function beginGame(resume){state=Object.assign(freshProgress(),resume?store.read():{});save();musicFadedForPlay=false;applyConfig();showScreen('screen-select');}
 $('#new-game').onclick=()=>beginGame(false);
 $('#continue-game').onclick=()=>beginGame(true);
