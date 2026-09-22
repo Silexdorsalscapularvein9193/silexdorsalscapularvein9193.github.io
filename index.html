@@ -490,7 +490,8 @@ const DEFAULTS = {
   uiSounds:true, music:{title:"",select:"",wily:"music/WilyStages.mp3",clear:"music/Epilogue.mp3"}, levels:[]
 };
 let loadedPack=window.LEVEL_PACK||{};
-try{sessionStorage.removeItem('selected-level-pack');const selected=sessionStorage.getItem('pending-level-pack');sessionStorage.removeItem('pending-level-pack');if(selected)loadedPack=JSON.parse(selected);}catch{}
+let packWasLoaded=false;
+try{sessionStorage.removeItem('selected-level-pack');const selected=sessionStorage.getItem('pending-level-pack');sessionStorage.removeItem('pending-level-pack');if(selected){loadedPack=JSON.parse(selected);packWasLoaded=true;}}catch{}
 let CONFIG = Object.assign({}, DEFAULTS, loadedPack);
 CONFIG.packFontSizePx=Math.max(6,Math.min(120,Number(CONFIG.packFontSizePx)||Math.round((Number(CONFIG.packFontSize)||100)*26/100)));
 CONFIG.levelNameFontSizePx=Math.max(6,Math.min(120,Number(CONFIG.levelNameFontSizePx)||Math.round((Number(CONFIG.levelNameFontSize)||100)*20/100)));
@@ -515,7 +516,7 @@ function ensureLevelSlots(){
   while(CONFIG.levels.length<18){const i=CONFIG.levels.length;CONFIG.levels.push({id:0,name:'Level '+(i+1),short:'Level '+(i+1),image:'',mugshotNumber:32,customMugshot:false});}
 }
 // Editing is a session control, independent of the saved pack.
-let editMode=!window.directPack;
+let editMode=!window.directPack&&!packWasLoaded;
 CONFIG.levels.forEach(l=>{
   const match=String(l.image||'').match(/(?:images\/bosses\/|images\/mugshots\/sprLevelMugshots_)(\d+)\.png$/);
   if(l.mugshotNumber==null)l.mugshotNumber=match?Number(match[1]):33;
@@ -700,7 +701,6 @@ function applyConfig(){
 
 /* ============================ title ============================ */
 function toggleEditMode(){
-  if(window.directPack)return;
   editMode=!editMode;
   applyConfig();
 }

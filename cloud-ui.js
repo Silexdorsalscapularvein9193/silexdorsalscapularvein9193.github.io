@@ -27,7 +27,7 @@
   };
   document.getElementById('browse-cloud-packs').onclick=window.browseCloudPacks;
   window.saveCloudPack=async()=>{
-    if(busy||window.directPack)return;
+    if(busy||(window.directPack&&!editMode))return;
     let name=CONFIG.cloudName;if(!name){name=prompt('Pack name for publishing:',CONFIG.packName||'');if(!name?.trim())return;name=name.trim();}
     busy=true;const {box,overlay}=dialog('SAVE PACK',false);status(box,'Connecting…');
     try{
