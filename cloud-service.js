@@ -79,14 +79,19 @@ window.PackCloud = (() => {
     // Read every published manifest before deleting anything, to protect shared assets.
     for(const [key,record] of Object.entries(records)){
       if(!record.manifestPath)continue;
-      const url=await s.storage.getDownloadURL(s.storage.ref(s.bucket,record.manifestPath));
-      const response=await fetch(url);if(!response.ok)throw Error('Could not check shared files. Please try again.');
       const target=key===slug?candidates:referenced;
-      target.add(record.manifestPath);collect(await response.json(),target);
+      target.add(record.manifestPath);
+      try{
+        const url=await s.storage.getDownloadURL(s.storage.ref(s.bucket,record.manifestPath));
+        const response=await fetch(url);
+        if(response.status===404)continue;
+        if(!response.ok)throw Error('Could not check shared files. Please try again.');
+        collect(await response.json(),target);
+      }catch(e){if(e.code!=='storage/object-not-found')throw e;}
     }
     async function gather(path){const result=await s.storage.listAll(s.storage.ref(s.bucket,path));result.items.forEach(item=>candidates.add(item.fullPath));for(const prefix of result.prefixes)await gather(prefix.fullPath);}
     await gather('levelPackCreator/'+slug);
-    for(const path of candidates){
+    for(const path of [...candidates].sort((a,b)=>Number(a===records[slug].manifestPath)-Number(b===records[slug].manifestPath))){
       if(referenced.has(path))continue;
       try{await s.storage.deleteObject(s.storage.ref(s.bucket,path));}catch(e){if(e.code!=='storage/object-not-found')throw e;}
     }
