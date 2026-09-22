@@ -18,7 +18,26 @@
     if(assets.some(v=>v&&(typeof v!=='string'||/["'<>\r\n]/.test(v)||(!/^(https:\/\/|data:(image|audio)\/|images\/|music\/|sounds\/|border\/)/.test(v)))))throw Error('Pack contains an unsupported asset path.');
     return pack;
   }
-  function install(pack){valid(pack);sessionStorage.setItem('pending-level-pack',JSON.stringify(pack));dirty=false;location.reload();}
+  function install(pack){
+    valid(pack);
+    CONFIG=Object.assign({},DEFAULTS,window.LEVEL_PACK||{},pack);
+    CONFIG.music=Object.assign({},DEFAULTS.music,pack.music||{});
+    CONFIG.levels=structuredClone(pack.levels);
+    CONFIG.levelCount=Number(pack.levelCount??8);CONFIG.wilyStageCount=Number(pack.wilyStageCount??4);
+    ensureLevelSlots();
+    CONFIG.weapons=Array.from({length:12},(_,i)=>Object.assign({icon:i+1,levels:[]},pack.weapons?.[i]));
+    CONFIG.tankLevels=pack.tankLevels||{};
+    state={beaten:{},weapons:{},tanks:{e:0,m:0},border:null,names:null,music:null,musicVolume:10,sounds:null};
+    editMode=false;dirty=false;musicFadedForPlay=false;
+    document.body.classList.remove('dirty');
+    if(pack.cloudSlug&&location.protocol!=='file:'){
+      history.replaceState(null,'',new URL(encodeURIComponent(pack.cloudSlug),document.baseURI));
+      window.directPack=pack.cloudSlug;document.body.classList.add('pack-locked');
+    }
+    document.querySelectorAll('.cloud-dialog').forEach(el=>el.remove());
+    document.getElementById('pack-modal').classList.remove('open');
+    showScreen('screen-title');applyConfig();
+  }
   window.browseCloudPacks=async()=>{
     if(window.directPack)return;
     const {box}=dialog('LOAD PACK');status(box,'Loading packs…');

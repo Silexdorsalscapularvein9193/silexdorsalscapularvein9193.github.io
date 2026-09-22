@@ -25,7 +25,7 @@ window.LEVEL_PACK = {
   "borderStyle": "MM1",
   "uiSounds": true,
   "music": {
-    "title": "",
+    "title": "music/TitleScreen.mp3",
     "select": "music/StageSelect",
     "wily": "music/WilyStages.mp3",
     "clear": "music/Epilogue.mp3"

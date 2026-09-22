@@ -487,7 +487,7 @@ const DEFAULTS = {
   packName:"LEVEL PACK", linkFormat:"megamaker://{id}",
   titleBackground:"images/TitleScreen.png", selectBackground:"images/LevelSelect", wilyBackground:"images/WilyStages",
   stageSpacing:12, stageOffsetY:0, showTileSquares:true, showLevelNames:true, borderStyle:"MM2",
-  uiSounds:true, music:{title:"",select:"",wily:"music/WilyStages.mp3",clear:"music/Epilogue.mp3"}, levels:[]
+  uiSounds:true, music:{title:"music/TitleScreen.mp3",select:"",wily:"music/WilyStages.mp3",clear:"music/Epilogue.mp3"}, levels:[]
 };
 let loadedPack=window.LEVEL_PACK||{};
 let packWasLoaded=false;
@@ -532,8 +532,11 @@ let dirty=false;
 function markDirty(){ dirty=true; document.body.classList.add('dirty'); }
 
 /* ============================ progress persistence ============================ */
-const store={read(){return {};},write(){}};
-let state=Object.assign({beaten:{}, border:null, names:null, music:null, musicVolume:10, sounds:null}, store.read());
+const progressStorageKey=()=>'level-pack-progress-v1:'+ (CONFIG.cloudSlug||CONFIG.packName);
+const store={read(){try{return JSON.parse(localStorage.getItem(progressStorageKey()))||{};}catch{return {};}},write(d){try{localStorage.setItem(progressStorageKey(),JSON.stringify({beaten:d.beaten,weapons:d.weapons,tanks:d.tanks}));}catch{}}};
+const freshProgress=()=>({beaten:{},weapons:{},tanks:{e:0,m:0},border:null,names:null,music:null,musicVolume:10,sounds:null});
+const progressKey=l=>'slot-'+CONFIG.levels.indexOf(l);
+let state=freshProgress();
 state.weapons=state.weapons||{};
 state.tanks={e:Math.max(0,Math.min(9,Number(state.tanks?.e)||0)),m:Math.max(0,Math.min(1,Number(state.tanks?.m)||0))};
 function save(){ store.write(state); }
@@ -559,9 +562,9 @@ const optSounds=()=>state.sounds??CONFIG.uiSounds;
 const $=s=>document.querySelector(s);
 const robots=()=>CONFIG.levels.slice(0,CONFIG.levelCount);
 const wily  =()=>CONFIG.levels.slice(12,12+CONFIG.wilyStageCount);
-const robotsBeaten=()=>robots().filter(l=>state.beaten[l.id]).length;
-const wilyBeaten=()=>{let n=0;for(const l of wily()){if(state.beaten[l.id])n++;else break;}return n;};
-const allClear=()=>(CONFIG.levelCount+CONFIG.wilyStageCount>0)&&robotsBeaten()===CONFIG.levelCount&&wily().every(l=>state.beaten[l.id]);
+const robotsBeaten=()=>robots().filter(l=>state.beaten[progressKey(l)]).length;
+const wilyBeaten=()=>{let n=0;for(const l of wily()){if(state.beaten[progressKey(l)])n++;else break;}return n;};
+const allClear=()=>(CONFIG.levelCount+CONFIG.wilyStageCount>0)&&robotsBeaten()===CONFIG.levelCount&&wily().every(l=>state.beaten[progressKey(l)]);
 function gameLink(l){ return 'megamaker://'+encodeURIComponent(l.id); }
 window.__openLink = url => { location.href = url; };
 async function playLevel(l){
@@ -620,7 +623,7 @@ function switchMusic(screenId){
   if(!path||!optMusic()){ bgm.pause(); bgm.removeAttribute('src'); return; }
   const play=url=>{
     if(!url){ bgm.pause(); bgm.removeAttribute('src'); return; }
-    const abs=new URL(url, location.href).href;
+    const abs=new URL(url, document.baseURI).href;
     if(bgm.src!==abs){ bgm.src=url; }
     if(interacted) bgm.play().catch(()=>{});
   };
@@ -714,7 +717,19 @@ document.addEventListener('keydown',e=>{
     toggleEditMode();
   }
 });
-function pressStart(){ sfx(); showScreen('screen-select'); }
+function pressStart(){
+  if(document.getElementById('game-choice'))return;
+  sfx();
+  const overlay=document.createElement('div');overlay.id='game-choice';overlay.className='overlay open';
+  const box=document.createElement('div');box.style.cssText='position:relative;background:#071328;border:4px solid #a4e4fc;padding:48px;display:flex;flex-direction:column;gap:24px;';box.setAttribute('role','dialog');box.setAttribute('aria-label','Start game');
+  const close=document.createElement('button');close.textContent='×';close.setAttribute('aria-label','Close');close.style.cssText='position:absolute;right:8px;top:4px;';close.onclick=()=>overlay.remove();box.append(close);
+  for(const [label,resume] of [['NEW GAME',false],['CONTINUE',true]]){
+    const button=document.createElement('button');button.textContent=label;button.className='pickbtn';
+    button.onclick=()=>{state=Object.assign(freshProgress(),resume?store.read():{});save();musicFadedForPlay=false;overlay.remove();applyConfig();showScreen('screen-select');};box.append(button);
+  }
+  overlay.append(box);document.body.append(overlay);box.children[1].focus();
+  overlay.addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();overlay.remove();}});
+}
 $('#btn-start').addEventListener('click',pressStart);
 document.addEventListener('keydown',e=>{
   if($('#screen-title').classList.contains('active')&&(e.key==='Enter'||e.key===' ')){
@@ -763,7 +778,7 @@ function renderSelect(){
       name.textContent=String(l.short||l.name);
       tile.setAttribute('aria-label',String(l.name));
       tile.appendChild(name);
-      if(state.beaten[l.id])tile.classList.add('beaten');
+      if(state.beaten[progressKey(l)])tile.classList.add('beaten');
       tile.addEventListener('click',()=>{
         if(editMode)openEditor(k);
         else openModal(l,'rm');
@@ -825,7 +840,7 @@ function openModal(l,kind){
   $('#stage-modal').classList.add('open');
 }
 function updateBeatBtn(){
-  const b=$('#modal-beat'),done=state.beaten[modalLevel.l.id];
+  const b=$('#modal-beat'),done=state.beaten[progressKey(modalLevel.l)];
   b.textContent=done?'CLEARED! (CLICK TO UNDO) ★':'MARK AS CLEARED ★';
   b.classList.toggle('done',!!done);
   $('#modal-mug').classList.toggle('cleared',!!done);
@@ -833,7 +848,7 @@ function updateBeatBtn(){
 $('#modal-play').addEventListener('click',()=>playLevel(modalLevel.l));
 $('#modal-web').addEventListener('click',()=>window.open(WEB+modalLevel.l.id,'_blank'));
 $('#modal-beat').addEventListener('click',()=>{
-  const id=modalLevel.l.id;
+  const id=progressKey(modalLevel.l);
   if(state.beaten[id])delete state.beaten[id];else state.beaten[id]=true;
   save();sfx();updateBeatBtn();
   if(modalLevel.kind==='rm')renderSelect();else renderWily();
@@ -985,7 +1000,7 @@ function refreshTankSettings(){
 }
 $('#ps-show-tanks').onclick=()=>{CONFIG.showTanks=!CONFIG.showTanks;markDirty();refreshTankSettings();renderTanks();};
 function weaponImage(n){return 'images/weaponicons/sprWeaponIconsColor/sprWeaponIconsColor_'+n+'.png';}
-function weaponEarned(w){return w.levels.some(index=>CONFIG.levels[index]&&state.beaten[CONFIG.levels[index].id]);}
+function weaponEarned(w){return w.levels.some(index=>CONFIG.levels[index]&&state.beaten[progressKey(CONFIG.levels[index])]);}
 function renderWeapons(){
   const row=$('#weapon-row');row.hidden=!CONFIG.showWeapons;row.replaceChildren();
   requestAnimationFrame(fitGridNames);
@@ -1149,13 +1164,13 @@ function renderWily(){
   wily().forEach((l,i)=>{
     const d=document.createElement('div');
     d.className='wstage';
-    d.innerHTML='WILY '+(i+1)+(state.beaten[l.id]?' ★':'');
-    if(state.beaten[l.id])d.classList.add('beaten');
+    d.innerHTML='WILY '+(i+1)+(state.beaten[progressKey(l)]?' ★':'');
+    if(state.beaten[progressKey(l)])d.classList.add('beaten');
     else if(i===prog)d.classList.add('current');
     else d.classList.add('locked');
     d.addEventListener('click',()=>{
       if(editMode){openEditor(12+i);return;}
-      if(i>prog&&!state.beaten[l.id]){sfx();return;}
+      if(i>prog&&!state.beaten[progressKey(l)]){sfx();return;}
       openModal(l,'wily');
     });
     holder.appendChild(d);
