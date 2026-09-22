@@ -18,7 +18,7 @@
     if(assets.some(v=>v&&(typeof v!=='string'||/["'<>\r\n]/.test(v)||(!/^(https:\/\/|data:(image|audio)\/|images\/|music\/|sounds\/|border\/)/.test(v)))))throw Error('Pack contains an unsupported asset path.');
     return pack;
   }
-  function install(pack){valid(pack);sessionStorage.setItem('selected-level-pack',JSON.stringify(pack));dirty=false;location.reload();}
+  function install(pack){valid(pack);sessionStorage.setItem('pending-level-pack',JSON.stringify(pack));dirty=false;location.reload();}
   window.browseCloudPacks=async()=>{
     if(window.directPack)return;
     const {box}=dialog('LOAD PACK');status(box,'Loading packs…');
@@ -28,13 +28,13 @@
   document.getElementById('browse-cloud-packs').onclick=window.browseCloudPacks;
   window.saveCloudPack=async()=>{
     if(busy||window.directPack)return;
-    let name=CONFIG.cloudName;if(!name){name=prompt('Pack name for publishing:','');if(!name?.trim())return;name=name.trim();}
+    let name=CONFIG.cloudName;if(!name){name=prompt('Pack name for publishing:',CONFIG.packName||'');if(!name?.trim())return;name=name.trim();}
     busy=true;const {box,overlay}=dialog('SAVE PACK',false);status(box,'Connecting…');
     try{
       const pack=JSON.parse(serializePack().replace(/^window\.LEVEL_PACK\s*=\s*/,'').replace(/;\s*$/,''));
       const saved=await PackCloud.publish(pack,name,text=>status(box,text));
       // Keep local edits in memory; subsequent saves reuse uploaded URLs from the snapshot.
-      Object.assign(CONFIG,saved);sessionStorage.setItem('selected-level-pack',JSON.stringify(saved));
+      Object.assign(CONFIG,saved);
       dirty=false;document.body.classList.remove('dirty');status(box,'Pack saved. Share this link:');
       const link=document.createElement('a');link.href=new URL(encodeURIComponent(saved.cloudSlug),'https://skypilotsamurai.github.io/LevelPackCreator/').href;link.textContent=link.href;box.append(link);
     }catch(e){status(box,friendly(e));}
