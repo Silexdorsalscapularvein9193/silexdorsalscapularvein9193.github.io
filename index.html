@@ -308,6 +308,7 @@ body:not(.squares-off)[data-border-style="MM3"] .mugshot-backing{background:#fff
 @container (max-width:600px){#equipment-row{min-height:24px;margin-bottom:3px;}}
 .rm-name,#wily-label,#modal-title,.wstage,.wstage.beaten{color:#fff;}
 body[data-border-style="MM6"] .portrait-frame{clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,16.666667% 16.666667%,16.666667% 83.333333%,83.333333% 83.333333%,83.333333% 16.666667%,16.666667% 16.666667%);}
+#game-choice{display:flex;flex-direction:column;align-items:center;gap:24px;}#game-choice[hidden]{display:none;}#game-choice button{background:none;border:0;box-shadow:none;color:white;font:inherit;font-size:24px;cursor:pointer;padding:8px;}#game-choice button:hover,#game-choice button:focus-visible{color:#a4e4fc;}
 </style>
 </head>
 <body>
@@ -322,7 +323,7 @@ body[data-border-style="MM6"] .portrait-frame{clip-path:polygon(evenodd,0 0,100%
         <div class="t1" id="title-line1">LEVEL PACK</div>
       </div>
       </div>
-      <div class="press-start" id="btn-start">PRESS START</div>
+      <div class="press-start" id="btn-start">PRESS START</div><div id="game-choice" hidden><button type="button" id="new-game">NEW GAME</button><button type="button" id="continue-game">CONTINUE</button></div>
 <button id="browse-cloud-packs" class="mbtn plain">LOAD PACK</button>
 
     </div>
@@ -717,19 +718,10 @@ document.addEventListener('keydown',e=>{
     toggleEditMode();
   }
 });
-function pressStart(){
-  if(document.getElementById('game-choice'))return;
-  sfx();
-  const overlay=document.createElement('div');overlay.id='game-choice';overlay.className='overlay open';
-  const box=document.createElement('div');box.style.cssText='position:relative;background:#071328;border:4px solid #a4e4fc;padding:48px;display:flex;flex-direction:column;gap:24px;';box.setAttribute('role','dialog');box.setAttribute('aria-label','Start game');
-  const close=document.createElement('button');close.textContent='×';close.setAttribute('aria-label','Close');close.style.cssText='position:absolute;right:8px;top:4px;';close.onclick=()=>overlay.remove();box.append(close);
-  for(const [label,resume] of [['NEW GAME',false],['CONTINUE',true]]){
-    const button=document.createElement('button');button.textContent=label;button.className='pickbtn';
-    button.onclick=()=>{state=Object.assign(freshProgress(),resume?store.read():{});save();musicFadedForPlay=false;overlay.remove();applyConfig();showScreen('screen-select');};box.append(button);
-  }
-  overlay.append(box);document.body.append(overlay);box.children[1].focus();
-  overlay.addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();overlay.remove();}});
-}
+function pressStart(){sfx();$('#btn-start').hidden=true;$('#game-choice').hidden=false;}
+function beginGame(resume){state=Object.assign(freshProgress(),resume?store.read():{});save();musicFadedForPlay=false;applyConfig();showScreen('screen-select');}
+$('#new-game').onclick=()=>beginGame(false);
+$('#continue-game').onclick=()=>beginGame(true);
 $('#btn-start').addEventListener('click',pressStart);
 document.addEventListener('keydown',e=>{
   if($('#screen-title').classList.contains('active')&&(e.key==='Enter'||e.key===' ')){
