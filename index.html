@@ -313,7 +313,7 @@ body:not(.squares-off)[data-border-style="MM3"] .mugshot-backing{background:#fff
 @container (max-width:600px){#equipment-row{min-height:24px;margin-bottom:3px;}}
 .rm-name,#wily-label,#modal-title,.wstage,.wstage.beaten{color:#fff;}
 body[data-border-style="MM6"] .portrait-frame{clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,16.666667% 16.666667%,16.666667% 83.333333%,83.333333% 83.333333%,83.333333% 16.666667%,16.666667% 16.666667%);}
-#game-choice{display:flex;flex-direction:column;align-items:center;gap:24px;}#game-choice[hidden]{display:none;}#game-choice button{background:none;border:0;box-shadow:none;color:white;font:inherit;font-size:24px;cursor:pointer;padding:8px;}#game-choice button:hover,#game-choice button:focus-visible{color:#a4e4fc;}
+#game-choice{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:max-content;max-width:100%;display:flex;flex-direction:column;align-items:center;gap:24px;}#game-choice[hidden]{display:none;}#game-choice button{background:none;border:0;box-shadow:none;color:white;font:inherit;font-size:24px;cursor:pointer;padding:8px;}#game-choice button:hover,#game-choice button:focus-visible{color:#a4e4fc;}
 </style>
 </head>
 <body>
@@ -539,7 +539,7 @@ function markDirty(){ dirty=true; document.body.classList.add('dirty'); }
 
 /* ============================ progress persistence ============================ */
 const progressStorageKey=()=>'level-pack-progress-v1:'+ (CONFIG.cloudSlug||CONFIG.packName);
-const store={read(){try{return JSON.parse(localStorage.getItem(progressStorageKey()))||{};}catch{return {};}},write(d){try{localStorage.setItem(progressStorageKey(),JSON.stringify({beaten:d.beaten,weapons:d.weapons,tanks:d.tanks}));}catch{}}};
+const store={read(){try{return JSON.parse(localStorage.getItem(progressStorageKey()))||{};}catch{return {};}},write(d){try{localStorage.setItem(progressStorageKey(),JSON.stringify({played:d.played===true,beaten:d.beaten,weapons:d.weapons,tanks:d.tanks}));}catch{}}};
 const freshProgress=()=>({beaten:{},weapons:{},tanks:{e:0,m:0},border:null,names:null,music:null,musicVolume:10,sounds:null});
 const progressKey=l=>'slot-'+CONFIG.levels.indexOf(l);
 let state=freshProgress();
@@ -724,8 +724,8 @@ document.addEventListener('keydown',e=>{
     toggleEditMode();
   }
 });
-function pressStart(){sfx();if(editMode){showScreen('screen-select');return;}$('#btn-start').hidden=true;$('#game-choice').hidden=false;}
-function beginGame(resume){state=Object.assign(freshProgress(),resume?store.read():{});save();musicFadedForPlay=false;applyConfig();showScreen('screen-select');}
+function pressStart(){sfx();if(editMode){showScreen('screen-select');return;}$('#continue-game').hidden=store.read().played!==true;$('#btn-start').hidden=true;$('#game-choice').hidden=false;}
+function beginGame(resume){state=Object.assign(freshProgress(),resume?store.read():{});state.played=true;save();musicFadedForPlay=false;applyConfig();showScreen('screen-select');}
 $('#new-game').onclick=()=>beginGame(false);
 $('#continue-game').onclick=()=>beginGame(true);
 $('#btn-start').addEventListener('click',pressStart);
