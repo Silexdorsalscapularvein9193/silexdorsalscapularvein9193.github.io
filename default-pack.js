@@ -14,7 +14,7 @@ window.LEVEL_PACK = {
   "titleAccentColor": "#ffffff",
   "packName": "LEVEL PACK",
   "linkFormat": "megamaker://{id}",
-  "titleBackground": "images/TitleScreen",
+  "titleBackground": "images/TitleScreen.png",
   "selectBackground": "images/LevelSelect",
   "wilyBackground": "images/WilyStages",
   "stageOffsetY": 10,
@@ -27,8 +27,8 @@ window.LEVEL_PACK = {
   "music": {
     "title": "",
     "select": "music/StageSelect",
-    "wily": "",
-    "clear": ""
+    "wily": "music/WilyStages.mp3",
+    "clear": "music/Epilogue.mp3"
   },
   "showTanks": true,
   "tankLevels": {
