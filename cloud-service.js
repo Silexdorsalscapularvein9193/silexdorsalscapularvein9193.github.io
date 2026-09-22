@@ -62,5 +62,35 @@ window.PackCloud = (() => {
     if(!claim.committed)throw Error('That name was just published. Save again to create a new version.');
     return {...result,cloudRevision:updatedAt};
   }
-  return {list,load,publish,slugify};
+  async function remove(slug){
+    if(!/^[a-z0-9][a-z0-9-]{0,69}$/.test(slug))throw Error('Invalid pack.');
+    const s=await sdk();
+    const records=(await s.db.get(s.db.ref(s.database,'levelPackCreator/packs'))).val()||{};
+    if(!records[slug])return;
+    const referenced=new Set(),candidates=new Set();
+    function collect(value,set){
+      if(typeof value==='string'){
+        try{const url=new URL(value);if(url.hostname==='firebasestorage.googleapis.com'){
+          const match=url.pathname.match(/\/b\/([^/]+)\/o\/(.+)/);
+          if(match&&match[1]===config.storageBucket){const path=decodeURIComponent(match[2]);if(path.startsWith('levelPackCreator/'))set.add(path);}
+        }}catch{}
+      }else if(value&&typeof value==='object')Object.values(value).forEach(v=>collect(v,set));
+    }
+    // Read every published manifest before deleting anything, to protect shared assets.
+    for(const [key,record] of Object.entries(records)){
+      if(!record.manifestPath)continue;
+      const url=await s.storage.getDownloadURL(s.storage.ref(s.bucket,record.manifestPath));
+      const response=await fetch(url);if(!response.ok)throw Error('Could not check shared files. Please try again.');
+      const target=key===slug?candidates:referenced;
+      target.add(record.manifestPath);collect(await response.json(),target);
+    }
+    async function gather(path){const result=await s.storage.listAll(s.storage.ref(s.bucket,path));result.items.forEach(item=>candidates.add(item.fullPath));for(const prefix of result.prefixes)await gather(prefix.fullPath);}
+    await gather('levelPackCreator/'+slug);
+    for(const path of candidates){
+      if(referenced.has(path))continue;
+      try{await s.storage.deleteObject(s.storage.ref(s.bucket,path));}catch(e){if(e.code!=='storage/object-not-found')throw e;}
+    }
+    await s.db.remove(s.db.ref(s.database,'levelPackCreator/packs/'+slug));
+  }
+  return {list,load,publish,slugify,remove};
 })();
