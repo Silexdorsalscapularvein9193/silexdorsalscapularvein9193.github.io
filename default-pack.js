@@ -86,8 +86,153 @@ window.LEVEL_PACK = {
   ],
   "victoryBackground": "images/default-assets/8e328a54756cb411bb406abf5d971a135296591c818269cc3d7af87c1ef62cd4.png",
   "victoryCredits": "",
-  "levelCount": 0,
-  "wilyStageCount": 0,
+  "levelCount": 8,
+  "wilyStageCount": 4,
   "gridSlotsVersion": 1,
-  "levels": []
+  "levels": [
+    {
+      "id": 0,
+      "name": "Level 1",
+      "short": "Level 1",
+      "image": "",
+      "mugshotNumber": 32,
+      "customMugshot": false
+    },
+    {
+      "id": 0,
+      "name": "Level 2",
+      "short": "Level 2",
+      "image": "",
+      "mugshotNumber": 32,
+      "customMugshot": false
+    },
+    {
+      "id": 0,
+      "name": "Level 3",
+      "short": "Level 3",
+      "image": "",
+      "mugshotNumber": 32,
+      "customMugshot": false
+    },
+    {
+      "id": 0,
+      "name": "Level 4",
+      "short": "Level 4",
+      "image": "",
+      "mugshotNumber": 32,
+      "customMugshot": false
+    },
+    {
+      "id": 0,
+      "name": "Level 5",
+      "short": "Level 5",
+      "image": "",
+      "mugshotNumber": 32,
+      "customMugshot": false
+    },
+    {
+      "id": 0,
+      "name": "Level 6",
+      "short": "Level 6",
+      "image": "",
+      "mugshotNumber": 32,
+      "customMugshot": false
+    },
+    {
+      "id": 0,
+      "name": "Level 7",
+      "short": "Level 7",
+      "image": "",
+      "mugshotNumber": 32,
+      "customMugshot": false
+    },
+    {
+      "id": 0,
+      "name": "Level 8",
+      "short": "Level 8",
+      "image": "",
+      "mugshotNumber": 32,
+      "customMugshot": false
+    },
+    {
+      "id": 0,
+      "name": "Level 9",
+      "short": "Level 9",
+      "image": "",
+      "mugshotNumber": 32,
+      "customMugshot": false
+    },
+    {
+      "id": 0,
+      "name": "Level 10",
+      "short": "Level 10",
+      "image": "",
+      "mugshotNumber": 32,
+      "customMugshot": false
+    },
+    {
+      "id": 0,
+      "name": "Level 11",
+      "short": "Level 11",
+      "image": "",
+      "mugshotNumber": 32,
+      "customMugshot": false
+    },
+    {
+      "id": 0,
+      "name": "Level 12",
+      "short": "Level 12",
+      "image": "",
+      "mugshotNumber": 32,
+      "customMugshot": false
+    },
+    {
+      "id": 0,
+      "name": "Wily Stage 1",
+      "short": "Wily Stage 1",
+      "image": "",
+      "mugshotNumber": 32,
+      "customMugshot": false
+    },
+    {
+      "id": 0,
+      "name": "Wily Stage 2",
+      "short": "Wily Stage 2",
+      "image": "",
+      "mugshotNumber": 32,
+      "customMugshot": false
+    },
+    {
+      "id": 0,
+      "name": "Wily Stage 3",
+      "short": "Wily Stage 3",
+      "image": "",
+      "mugshotNumber": 32,
+      "customMugshot": false
+    },
+    {
+      "id": 0,
+      "name": "Wily Stage 4",
+      "short": "Wily Stage 4",
+      "image": "",
+      "mugshotNumber": 32,
+      "customMugshot": false
+    },
+    {
+      "id": 0,
+      "name": "Wily Stage 5",
+      "short": "Wily Stage 5",
+      "image": "",
+      "mugshotNumber": 32,
+      "customMugshot": false
+    },
+    {
+      "id": 0,
+      "name": "Wily Stage 6",
+      "short": "Wily Stage 6",
+      "image": "",
+      "mugshotNumber": 32,
+      "customMugshot": false
+    }
+  ]
 };
