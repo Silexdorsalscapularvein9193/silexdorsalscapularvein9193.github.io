@@ -14,7 +14,7 @@
   function friendly(error){if(/permission|unauthorized/i.test(error.code||error.message))return 'Firebase access is not enabled yet. Apply the Level Pack Creator rules.';return error.message||'Unable to connect to Firebase. Please try again.';}
   function valid(pack){
     if(!pack||!Array.isArray(pack.levels)||pack.levels.length>100)throw Error('Invalid pack.');
-    const assets=[pack.titleBackground,pack.selectBackground,pack.wilyBackground,pack.victoryBackground,pack.wilyIcon,...Object.values(pack.music||{}),...pack.levels.flatMap(l=>[l.image,l.localLevelUrl])];
+    const assets=[pack.customBorderDefault,pack.customBorderActive,pack.titleBackground,pack.selectBackground,pack.wilyBackground,pack.victoryBackground,pack.wilyIcon,...Object.values(pack.music||{}),...pack.levels.flatMap(l=>[l.image,l.localLevelUrl])];
     if(assets.some(v=>v&&(typeof v!=='string'||/["'<>\r\n]/.test(v)||(!/^(https:\/\/|data:(image|audio)\/|images\/|music\/|sounds\/|border\/)/.test(v)))))throw Error('Pack contains an unsupported asset path.');
     return pack;
   }

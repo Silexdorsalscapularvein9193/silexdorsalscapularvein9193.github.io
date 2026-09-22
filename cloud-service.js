@@ -48,7 +48,7 @@ window.PackCloud = (() => {
       const blob=await response.blob();const ext=({'image/png':'png','image/jpeg':'jpg','image/gif':'gif','image/webp':'webp','audio/mpeg':'mp3','audio/wav':'wav','audio/ogg':'ogg'})[blob.type]||'bin';return upload(blob,ext);
     }
     const result=structuredClone(pack);
-    for(const key of ['titleBackground','selectBackground','wilyBackground','victoryBackground','wilyIcon']){progress('Uploading assets…');result[key]=await asset(result[key]);}
+    for(const key of ['customBorderDefault','customBorderActive','titleBackground','selectBackground','wilyBackground','victoryBackground','wilyIcon']){progress('Uploading assets…');result[key]=await asset(result[key]);}
     for(const key of Object.keys(result.music||{}))result.music[key]=await asset(result.music[key]);
     for(const level of result.levels){
       if(level.customMugshot)level.image=await asset(level.image);
